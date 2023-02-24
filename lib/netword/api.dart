@@ -1,0 +1,1 @@
+const String API_DATE_KEY = "https://63c556cbe1292e5bea20ca81.mockapi.io/api/app-flutter/";
