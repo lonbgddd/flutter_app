@@ -1,7 +1,7 @@
 import 'package:assignments_final/model/post.dart';
 import 'package:flutter/material.dart';
 
-Widget commentButton(BuildContext context, Post post) {
+Widget commentButton(BuildContext context, int? post) {
   return Expanded(
       flex: 1,
       child: GestureDetector(
@@ -20,7 +20,7 @@ Widget commentButton(BuildContext context, Post post) {
               shrinkWrap: true,
               controller: scrollController,
               children: [
-                Text(post.numberComment!.length.toString()+' bình luận', style:  TextStyle(fontSize: 16),)
+                Text('10 bình luận', style:  TextStyle(fontSize: 16),)
 
               ],
             ),

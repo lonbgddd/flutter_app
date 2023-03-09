@@ -1,12 +1,11 @@
-import 'dart:math';
-
 import 'package:assignments_final/model/user.dart';
 import 'package:assignments_final/netword/viewModel/home_view_model.dart';
-import 'package:assignments_final/screens/home/comporment/list_post.dart';
-import 'package:assignments_final/screens/home/follow.dart';
+import 'package:assignments_final/screens/home/comporment/item.dart';
 import 'package:assignments_final/screens/post/post_new_data.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import 'comporment/listPost.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key, required this.user}) : super(key: key);
@@ -20,7 +19,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    Provider.of<HomeViewModel>(context, listen: false).fetchPostList();
+    context.read<HomeViewModel>().fetchPostList();
   }
 
   bool isLoading = false;
@@ -28,12 +27,12 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final List<Icon> tabs = <Icon>[
-      Icon(
+      const Icon(
         Icons.home,
         size: 35,
       ),
-      Icon(Icons.insert_emoticon_sharp, size: 35),
-      Icon(Icons.notifications_active, size: 35)
+      const Icon(Icons.insert_emoticon_sharp, size: 35),
+      const Icon(Icons.notifications_active, size: 35)
     ];
     return DefaultTabController(
         length: tabs.length, // This is the number of tabs.
@@ -49,7 +48,7 @@ class _HomeState extends State<Home> {
                   sliver: SliverAppBar(
                     backgroundColor: Colors.white,
                     floating: true,
-                    title: Text(
+                    title: const Text(
                       'Chào mừng trở lại!',
                       style: TextStyle(color: Colors.black),
                     ),
@@ -62,13 +61,13 @@ class _HomeState extends State<Home> {
                                     builder: (context) =>
                                         PostNew(idUser: widget.user),
                                   )),
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.add,
                                 color: Colors.black,
                                 size: 38,
                               ))
-                          : SizedBox(),
-                      SizedBox(
+                          : const SizedBox(),
+                      const SizedBox(
                         width: 10,
                       ),
                     ],
@@ -89,9 +88,8 @@ class _HomeState extends State<Home> {
             },
             body: TabBarView(
               children: [
-                homListView(context),
-                FollowListPost(user: widget.user),
-                Center(
+                homListView(context, widget.user),
+                const Center(
                   child: Text('Màn 3'),
                 )
               ],
@@ -100,30 +98,4 @@ class _HomeState extends State<Home> {
         ));
   }
 
-  Widget homListView(BuildContext context) {
-    final listProvider = Provider.of<HomeViewModel>(context);
-    return Padding(
-        padding: EdgeInsets.only(top: 60),
-        child: RefreshIndicator(
-            backgroundColor: Colors.black12,
-            onRefresh: () async {
-              setState(() {
-                Provider.of<HomeViewModel>(context, listen: false)
-                    .fetchPostList();
-              });
-            },
-            child: Center(
-              child: listProvider.listPost.length != 0
-                  ? ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: listProvider.listPost.length,
-                      itemBuilder: (BuildContext context, index) => listPost(
-                        context,
-                        post: listProvider.listPost[index],
-                        user: widget.user,
-                      ),
-                    )
-                  : CircularProgressIndicator(),
-            )));
-  }
 }

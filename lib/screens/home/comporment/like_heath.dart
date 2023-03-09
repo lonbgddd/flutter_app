@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../model/post.dart';
 
 class LikeHeath extends StatefulWidget {
-  const LikeHeath({Key? key, required this.post}) : super(key: key);
-  final Post? post;
+  const LikeHeath({Key? key, this.indexPost}) : super(key: key);
+  final int? indexPost;
 
   @override
   State<LikeHeath> createState() => _LikeHeathState();

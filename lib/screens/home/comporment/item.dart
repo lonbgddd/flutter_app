@@ -4,33 +4,25 @@ import 'dart:typed_data';
 import 'package:assignments_final/model/post.dart';
 import 'package:assignments_final/netword/postData/postServer.dart';
 import 'package:assignments_final/netword/userData/newUser.dart';
+import 'package:assignments_final/netword/viewModel/home_view_model.dart';
 import 'package:assignments_final/screens/home/comporment/comment_button.dart';
-import 'package:assignments_final/screens/post/post_new_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../model/user.dart';
 import '../../post/updatePost.dart';
 import 'like_bottom.dart';
 import 'like_heath.dart';
 
-class listPost extends StatefulWidget {
-  const listPost(
-    BuildContext context, {
-    Key? key,
-    required this.post,
-    this.user,
-  }) : super(key: key);
-  final Post? post;
-  final User? user;
-
-  @override
-  State<listPost> createState() => _listPostState();
-}
-
 enum SampleItem { itemUpdate, itemFollow, itemDelete }
 
-class _listPostState extends State<listPost> {
+class ListPost extends StatelessWidget {
+  const ListPost({Key? key, required this.indexPost, this.indexUser})
+      : super(key: key);
+  final int indexPost;
+  final User? indexUser;
+
   deletePost(String idPost) async {
     await PostServer().deleteByID(idPost);
   }
@@ -40,17 +32,9 @@ class _listPostState extends State<listPost> {
   }
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    Post? post = widget.post;
-    Uint8List list = base64Decode(post!.avatar!);
-    Uint8List image = base64Decode(post!.image);
     SampleItem? selectedMenu;
+    final viewModel = context.watch<HomeViewModel>();
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 2, vertical: 5),
       child: Container(
@@ -73,7 +57,9 @@ class _listPostState extends State<listPost> {
                           height: 60,
                           width: 60,
                           child: ClipOval(
-                            child: Image.memory(list, fit: BoxFit.cover),
+                            child: Image.memory(
+                                viewModel.getAvatar(indexPost) as Uint8List,
+                                fit: BoxFit.cover),
                           ),
                           decoration: BoxDecoration(
                               border: Border.all(width: 1, color: Colors.white),
@@ -82,7 +68,7 @@ class _listPostState extends State<listPost> {
                         Padding(
                             padding: EdgeInsets.only(bottom: 14, left: 8),
                             child: Text(
-                              post.nameUser!,
+                              viewModel.getName(indexPost),
                               style: TextStyle(
                                   fontSize: 22, fontWeight: FontWeight.bold),
                             )),
@@ -94,36 +80,40 @@ class _listPostState extends State<listPost> {
                           initialValue: selectedMenu,
                           // Callback that sets the selected popup menu item.
                           onSelected: (SampleItem item) {
-                            setState(() {
-                              selectedMenu = item;
-                            });
+                            selectedMenu = item;
                             switch (item) {
                               case SampleItem.itemUpdate:
-                                widget.user?.id != widget.post?.idUser
+                                indexUser!.id != viewModel.getIdUser(indexPost)
                                     ? _showCupertinoDialog(
+                                        context,
                                         "Bạn không phải chủ bài đăng",
                                         "Không có quyền chỉnh sửa")
-                                    : Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => UpdatePost(
-                                              idUser: widget.user,
-                                              post: widget.post),
-                                        ));
+                                    : Center(
+                                        child: Text("Rỗng"),
+                                      );
+
+                                // Navigator.push(
+                                //         context,
+                                //         MaterialPageRoute(
+                                //           builder: (context) => UpdatePost(
+                                //               idUser: indexUser,
+                                //               post: viewModel.getIdUser(indexPost)),
+                                //         ));
                                 break;
                               case SampleItem.itemDelete:
-                                widget.user?.id != widget.post?.idUser
+                                indexUser!.id != viewModel.getIdUser(indexPost)
                                     ? _showCupertinoDialog(
+                                        context,
                                         "Bạn không phải chủ bài đăng",
                                         "Không có quyền xoá")
-                                    : deletePost(widget.post!.idPost!);
+                                    : deletePost(viewModel.getIdPost(indexPost));
 
                                 break;
                               case SampleItem.itemFollow:
-                                addPostId(
-                                    widget.post!.idPost!, widget.user!.id!);
-                                _showCupertinoDialog(
-                                    "Chúc mừng bạn", "Theo dõi thành công");
+                                // addPostId(
+                                //     widget.post!.idPost!, widget.user!.id!);
+                                // _showCupertinoDialog(context, "Chúc mừng bạn",
+                                //     "Theo dõi thành công");
                                 break;
                             }
                           },
@@ -156,14 +146,14 @@ class _listPostState extends State<listPost> {
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(post.contents,
+                  child: Text(viewModel.getContent(indexPost),
                       style: TextStyle(
                           fontSize: 18, fontWeight: FontWeight.normal)),
                 ),
                 Container(
                     height: 200,
                     child: Image.memory(
-                      image,
+                      viewModel.getImage(indexPost) as Uint8List,
                       width: MediaQuery.of(context).size.width,
                       fit: BoxFit.fitWidth,
                     )),
@@ -178,10 +168,10 @@ class _listPostState extends State<listPost> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Icon(Icons.favorite_border),
-                          Text("${post.numberLikes!.length}")
+                          Text("${viewModel.likes(indexPost).length}")
                         ],
                       ),
-                      Text("${post.numberComment!.length} bình luận"),
+                      Text("${viewModel.likes(indexPost).length}"),
                     ],
                   ),
                 ),
@@ -197,9 +187,9 @@ class _listPostState extends State<listPost> {
                 Row(
                   children: [
                     LikeHeath(
-                      post: post,
+                      indexPost: indexPost,
                     ),
-                    commentButton(context, post),
+                    commentButton(context, indexPost),
                     boderLikeShare(Icon(Icons.share), 'Chia sẻ')
                   ],
                 ),
@@ -212,7 +202,8 @@ class _listPostState extends State<listPost> {
     );
   }
 
-  void _showCupertinoDialog(String title, String content) {
+  void _showCupertinoDialog(
+      BuildContext context, String title, String content) {
     showDialog(
         context: context,
         builder: (context) {

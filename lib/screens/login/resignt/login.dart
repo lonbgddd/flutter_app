@@ -1,7 +1,9 @@
 import 'package:assignments_final/netword/userData/newUser.dart';
+import 'package:assignments_final/netword/viewModel/loginViewModel.dart';
 import 'package:assignments_final/screens/home/home_srceen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 
 import '../../../model/user.dart';
@@ -19,23 +21,18 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isValidatePhone = false;
   bool isValidatePass = false;
 
-  void loginHome(String phone, String pass) async {
-    User user = await UserServer().getUser(phone, pass);
-    if (user != null) {
-      String? token = await FirebaseMessaging.instance.getToken();
-      await UserServer().addUserToken(user.id!, token!);
-      await Future.delayed(
-        Duration(seconds: 1),
-        () {
-          print(user.idPosts);
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home(user: user,),));
-        },
-      );
-    }
+  @override
+  void initState() {
+    // TODO: implement initState
+    context.watch<LoginViewModel>();
+    super.initState();
+
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<LoginViewModel>();
+
     return Scaffold(
       backgroundColor: Colors.grey[300],
       body: Center(
@@ -96,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: passwordUser,
                     decoration: InputDecoration(
                       errorText:
-                          isValidatePass ? 'Bạn chưa nhập mật khẩu' : null,
+                      isValidatePass ? 'Bạn chưa nhập mật khẩu' : null,
                       border: InputBorder.none,
                       hintText: "Mật khẩu",
                     ),
@@ -121,8 +118,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       isValidatePass = false;
                     }
                   });
-                  loginHome(phoneUser.text, passwordUser.text);
 
+                  // login view model
+                  user.loginGetData(phoneUser.text, passwordUser.text);
+                  user.user == "null" ? SnackBar(
+                      content: Text('Tài khoản không tồn tại')) : Navigator
+                      .pushReplacement(
+                      context, MaterialPageRoute(
+                    builder: (context) => Home(user: user.user!),));
                 },
                 style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 100, vertical: 8),

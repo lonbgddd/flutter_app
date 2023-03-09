@@ -1,3 +1,4 @@
+import 'package:assignments_final/netword/viewModel/loginViewModel.dart';
 import 'package:assignments_final/route/route.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -17,15 +18,6 @@ Future<void> main() async {
   await WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await RouterFluro.initRouter();
-  final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-  firebaseMessaging.requestPermission();
-  firebaseMessaging.subscribeToTopic('myTopic');
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print('Got a message while in the foreground!');
-    print('Message data: ${message.data}');
-  });
-
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   runApp(const MyApp());
 }
 
@@ -47,7 +39,8 @@ class _MyAppState extends State<MyApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => HomeViewModel(),),
-        ChangeNotifierProvider(create: (context) => FollowViewModel(),)
+        ChangeNotifierProvider(create: (context) => FollowViewModel(),),
+        ChangeNotifierProvider(create: (context) => LoginViewModel(),)
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
